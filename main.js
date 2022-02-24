@@ -1,23 +1,7 @@
-const k = 24; // number of letters in full name
-const m = 4; // number of letters in the name
-const matrix = [
-    [ 12+k , 2     , m/4   , 1    , 2     ],
-    [ 4    , 113+k , 1     , m/10 , m-4   ],
-    [ 1    , 2     , -24-k , 3    , 4     ],
-    [ 1    , 2/m   , 4     , 33+k , 4     ],
-    [ -1   , 2     , -3    , 3+m  , -44-k ],
-];
-//const matrix_width = matrix[0].length;
-//const matrix_height = matrix.length;
-const vect_num = [ 1, 2, 3, 4, 5];
-
-function CholeskyMethod() {
-    const p_and_c_matrices = CreateMatricesCholesky(matrix);
-    return p_and_c_matrices;
-};
-
-function SeidelMethod() {
-
+function CholeskyMethod(matr, vect) {
+    const p_and_c_matrices = CreateMatricesCholesky(matr);
+    const answer = CalcXCholesky(p_and_c_matrices, vect); 
+    return answer;
 };
 
 function CreateMatricesCholesky(initial_matrix) {
@@ -55,7 +39,33 @@ function CreateMatricesCholesky(initial_matrix) {
     return { p_matrix, c_matrix };
 };
 
-function MultMatrix(matr_1, matr_2) {
+function CalcXCholesky(p_and_c, vect) {
+    const y_elems = [];
+    y_elems.push(vect[0] / p_and_c.p_matrix[0][0]);
+    for(let i = 1; i < vect.length; i++) {
+        let elem = 0;
+        for(let k = 0; k < i-1; k++) {
+            elem += p_and_c.p_matrix[i][k] * y_elems[k];
+        };
+        y_elems.push((vect[i] - elem) / p_and_c.p_matrix[i][i]);
+    };
+    const x_elems = [];
+    x_elems[vect.length - 1] = y_elems[vect.length - 1];
+    for(let i = vect.length - 2; i >= 0; i--) {
+        let elem = 0;
+        for(let k = i + 1; k < vect.length; k++) {
+            elem += p_and_c.c_matrix[i][k] * x_elems[k];
+        };
+        x_elems[i] = y_elems[i] - elem;
+    };
+    return x_elems;
+};
+
+function SeidelMethod() {
+
+};
+
+/* function MultMatrix(matr_1, matr_2) {
     const answer = [];
     for(let i = 0; i < matr_1.length; i++) {
         answer.push([]);
@@ -69,12 +79,18 @@ function MultMatrix(matr_1, matr_2) {
         };
     };
     return answer;
-};
+}; */
 
-window.onload = () => {
-
-    //const elem = CreateMatricesCholesky(matrix);
-    //const elem = MultMatrix([[1, 2], [3, 4]], [[5, 6], [7, 8]]);
-    console.log(elem);
-
+window.onload = () => { // Матрица и вектор из примера: [[ -4,  1,  1], [  1, -9,  3], [  1,  2, -16]], [2, 5, 13]
+    const k = 24; // number of letters in full name
+    const m = 4; // number of letters in the name
+    const matrix = [[ 12+k , 2     , m/4   , 1    , 2     ],
+                    [ 4    , 113+k , 1     , m/10 , m-4   ],
+                    [ 1    , 2     , -24-k , 3    , 4     ],
+                    [ 1    , 2/m   , 4     , 33+k , 4     ],
+                    [ -1   , 2     , -3    , 3+m  , -44-k ],
+    ];
+    const vect_num = [ 1, 2, 3, 4, 5];
+    const answer = CholeskyMethod(matrix, vect_num);
+    console.log(answer);
 };
